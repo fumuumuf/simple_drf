@@ -26,3 +26,7 @@ flake8-quotes
 # others
 django-extensions
 jupyter
+
+
+# append packages
+django-currentuser
