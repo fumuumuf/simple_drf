@@ -16,8 +16,20 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.documentation import include_docs_urls
+from rest_framework.permissions import AllowAny
+
+import articles.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^silk/', include('silk.urls', namespace='silk')),
+    path('articles/', include(articles.urls)),
 ]
+
+urlpatterns.append(
+    url(r'^docs/', include_docs_urls(title='API Docs',
+                                     permission_classes=(AllowAny,),
+                                     authentication_classes=(SessionAuthentication,)))
+)
