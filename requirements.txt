@@ -1,0 +1,28 @@
+Django==2.1
+djangorestframework==3.9
+django-filter
+coreapi
+django-rest-auth[with_social]
+Markdown
+Pygments
+django-model-utils
+inflection
+drf-extensions
+
+# inspection
+django-silk
+
+
+# testing
+pytest-django
+mock
+factory-boy
+tox
+
+# static code analysis
+flake8
+flake8-quotes
+
+# others
+django-extensions
+jupyter
