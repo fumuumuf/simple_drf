@@ -6,17 +6,47 @@ Python 3.7
 
 ### packages
 
-[requirements.txt](/requirements.txt) を参照
+[requirements.txt](apps/requirements.txt) を参照
 
 ## usage
 
+### local
+
 ```shell
+cd apps
 pip install -r requirements.txt
 
 python manage.py migrate
 
 python manage.py runserver
 ```
+
+### use docker
+
+```shell
+docker-compose up
+docker exec -it simple_drf bash 
+
+# --- inner container ---
+
+pip install -r requirements.txt
+python manage.py runserver
+```
+
+#### use mysql
+
+docker では mysql を使用できるようにしてる. `.env` か環境変数で `USE_DB=mysql` を設定する.
+
+```shell
+# --- inner container ---
+cp sample.env .env
+
+# cleanup mysql (初回のみ実行)
+sh reset_mysql.sh 
+
+python manage.py runserver
+```
+
 
 ## 初期データ
 テスト用データは, 各 app の `/fixutres/data.son` に配置する.

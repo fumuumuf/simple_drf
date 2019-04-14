@@ -1,0 +1,30 @@
+version: '2.3'
+services:
+  # mysql
+  db:
+    image: mysql:5.7.19
+    ports:
+      - 13306:3306
+    volumes:
+      - ./docker/mysql/volumes:/var/lib/mysql
+      - ./docker/mysql/:/etc/mysql/conf.d
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    container_name: simpe_drf_mysql
+  # django
+  django_app:
+    build: 
+      context: ./
+      dockerfile: ./docker/Dockerfile
+    container_name: simple_drf
+    ports:
+      - 18000:8000
+    environment:
+      - DB_HOST=db
+      - DB_NAME=mysql_db
+      - DB_PASS=password
+    volumes:
+      - ./apps:/var/www/django
+    tty: true
+    depends_on:
+      - db

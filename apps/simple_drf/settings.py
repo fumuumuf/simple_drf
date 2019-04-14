@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -24,7 +25,7 @@ SECRET_KEY = 'i#d+^(t6ls2^=d_z@dk=sc=&=*ib3s6l=krc=d5e8!%rv3&h3+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -77,12 +78,30 @@ WSGI_APPLICATION = 'simple_drf.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if os.getenv('USE_DB', '') == 'mysql':
+    import pymysql
+
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'drf_db'),
+            'USER': 'root',
+            'PASSWORD': 'password',
+            'HOST': os.getenv('DB_HOST', 'db'),
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            }
+        },
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -139,5 +158,3 @@ NOTEBOOK_ARGUMENTS = [
     '--port', '8000',
     '--allow-root'
 ]
-
-

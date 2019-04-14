@@ -8,6 +8,9 @@ Pygments
 django-model-utils
 inflection
 drf-extensions
+PyMySQL
+mysqlclient
+python-dotenv
 
 # inspection
 django-silk
