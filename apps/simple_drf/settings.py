@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'silk',
     'accounts',
     'articles',
+    'multi_tenants'
 ]
 
 MIDDLEWARE = [

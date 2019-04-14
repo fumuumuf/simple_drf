@@ -15,3 +15,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.prefetch_related('tags')
 
+
+    def get_queryset(self):
+        print(self.request.get_host())
+        return super(ArticleViewSet, self).get_queryset()

@@ -8,4 +8,4 @@ if [ `mysql -uroot -ppassword -h${DB_HOST} -e 'show databases' | grep ${DB_NAME}
 fi
 mysql -uroot -ppassword -h${DB_HOST} -e "create database ${DB_NAME};"
 
-python manage.py migrate
+# python manage.py migrate
