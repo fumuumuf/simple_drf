@@ -35,7 +35,7 @@ python manage.py runserver
 
 #### use mysql
 
-docker では mysql を使用できるようにしてる.
+docker では mysql を使用できるようにしてる. `.env` か環境変数で `USE_DB=mysql` を設定する.
 
 ```shell
 # --- inner container ---
