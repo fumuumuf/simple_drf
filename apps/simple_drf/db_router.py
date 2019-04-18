@@ -1,12 +1,15 @@
+from .middleware import get_current_db_name
+
+
 class CustomDBRouter:
     """
     DB のルーティングを制御します.
     """
 
     def common_routing(self, model):
-        if model._meta.app_label == self.high_g_app:
-            return self.replica_db
-        return 'default'
+        db = get_current_db_name() # or 'default'
+        # print('routing db', db)
+        return db
 
     def db_for_read(self, model, **hints):
         return self.common_routing(model)
@@ -18,10 +21,10 @@ class CustomDBRouter:
         """
         Allow relations
         """
-
         return None
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """
+        allow migrations
         """
         return None

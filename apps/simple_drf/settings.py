@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'simple_drf.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,40 +77,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'simple_drf.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-# if os.getenv('USE_DB', '') == 'mysql':
-#     import pymysql
-#
-#     pymysql.install_as_MySQLdb()
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.mysql',
-#             'NAME': os.getenv('DB_NAME', 'drf_db'),
-#             'USER': 'root',
-#             'PASSWORD': 'password',
-#             'HOST': os.getenv('DB_HOST', 'db'),
-#             'PORT': '3306',
-#             'OPTIONS': {
-#                 'charset': 'utf8mb4',
-#             }
-#         },
-#     }
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         }
-#     }
 DATABASES = {
     "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "default.sqlite3"},
     "thor": {"ENGINE": "django.db.backends.sqlite3", "NAME": "thor.sqlite3"},
     "potter": {"ENGINE": "django.db.backends.sqlite3", "NAME": "potter.sqlite3"},
 }
 
-DATABASE_ROUTERS = ['simple_drf.CustomDBRouter']
+DATABASE_ROUTERS = ['simple_drf.db_router.CustomDBRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
