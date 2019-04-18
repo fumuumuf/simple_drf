@@ -45,11 +45,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'simple_drf.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'simple_drf.middleware.TenantMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

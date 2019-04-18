@@ -7,7 +7,7 @@ class CustomDBRouter:
     """
 
     def common_routing(self, model):
-        db = get_current_db_name() # or 'default'
+        db = get_current_db_name()
         # print('routing db', db)
         return db
 
