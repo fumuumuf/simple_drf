@@ -10,9 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+import collections
 import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from datetime import date
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,13 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'constance',
+    'constance.backends.database',
     'django_extensions',
     'rest_framework',
     'silk',
     'accounts',
     'articles',
-    'constance',
-    'constance.backends.database',
 ]
 
 MIDDLEWARE = [
@@ -161,21 +162,29 @@ NOTEBOOK_ARGUMENTS = [
     '--allow-root'
 ]
 
-
-#--------------------------------
+# --------------------------------
 # django-constance 設定
 #
 # backend に DatabaseBackendを使用
-#--------------------------------
+# --------------------------------
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
     'SITE_NAME': ('My Title', 'Website title'),
     'SITE_DESCRIPTION': ('', 'Website description'),
     'THEME': ('light-blue', 'Website theme'),
+    'SPAM': (True, 'spam description', bool),
+    'HAM': (114514, 'ham description', int),
+    'DEFAULT_DATE': (date(2018, 1, 1), 'default date', date),
 }
 
-CONSTANCE_CONFIG_FIELDSETS = {
-    'General Options': ('SITE_NAME', 'SITE_DESCRIPTION'),
-    'Theme Options': ('THEME',),
-}
+CONSTANCE_CONFIG_FIELDSETS = collections.OrderedDict([
+    ('General Options', ('SITE_NAME', 'SITE_DESCRIPTION')),
+    ('Theme Options', ('THEME',)),
+    ('Others', ('SPAM', 'HAM', 'DEFAULT_DATE'))
+])
+
+# appended_fields = set(chain(*CONSTANCE_CONFIG_FIELDSETS.values()))
+# rest_fields = tuple(f for f in CONSTANCE_CONFIG.keys() if f not in appended_fields)
+# if rest_fields:
+#     CONSTANCE_CONFIG_FIELDSETS['Other Options'] = rest_fields
