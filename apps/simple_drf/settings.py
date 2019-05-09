@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'silk',
     'accounts',
     'articles',
+    'constance',
+    'constance.backends.database',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +160,22 @@ NOTEBOOK_ARGUMENTS = [
     '--port', '8000',
     '--allow-root'
 ]
+
+
+#--------------------------------
+# django-constance 設定
+#
+# backend に DatabaseBackendを使用
+#--------------------------------
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'SITE_NAME': ('My Title', 'Website title'),
+    'SITE_DESCRIPTION': ('', 'Website description'),
+    'THEME': ('light-blue', 'Website theme'),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    'General Options': ('SITE_NAME', 'SITE_DESCRIPTION'),
+    'Theme Options': ('THEME',),
+}
