@@ -48,15 +48,12 @@ class PKWritableMixin:
         # 変更したフィールドはもとの serializer でレンダリング
         for f, _serializer in self.org_pk_fields.items():
             source = getattr(self.fields[f], 'source') or f
-            print(f, source)
             if f in res:
-                print(_serializer.to_representation(getattr(obj, source)))
-                res[f] = _serializer.to_representation(getattr(obj, source))
+                attr_val = getattr(obj, source)
+                if attr_val:
+                    res[f] = _serializer.to_representation(getattr(obj, source))
         return res
 
-    class Meta:
-        model = Article
-        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
