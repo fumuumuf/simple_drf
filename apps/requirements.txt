@@ -1,5 +1,5 @@
-Django>=2.1.6
-djangorestframework==3.9
+Django==2.1.*
+djangorestframework==3.9.*
 django-filter
 coreapi
 django-rest-auth[with_social]
@@ -9,7 +9,7 @@ django-model-utils
 inflection
 drf-extensions
 PyMySQL
-mysqlclient
+# mysqlclient
 python-dotenv
 
 # inspection
