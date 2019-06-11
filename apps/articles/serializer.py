@@ -5,20 +5,19 @@ from articles.models import Article, Category, Tag
 
 class PKWritableMixin:
     """
-    ModelSerializer を継承したフィールドを,
-    更新系アクションのときは ID(PrimaryKeyRelatedField)で更新可能とする Mixin
+    ModelSerializer を継承したフィールドに対し
+    更新系アクションのときは id(PrimaryKeyRelatedField)で更新可能とする Mixin
     """
 
     def __init__(self, *args, **kwargs):
         self._org_pk_fields = {}
         super(PKWritableMixin, self).__init__(*args, **kwargs)
 
-    def _get_pk_field(self, field):
+    def _get_pk_field(self, field, queryset):
         """
         ModelSerializer の更新用の PrimaryKeyRelatedField を返します.
         対象フィールドが ModelSerializer でない場合は None を返します.
         """
-
 
         attrs = {}
         if isinstance(field, serializers.ListSerializer):
@@ -30,7 +29,9 @@ class PKWritableMixin:
         else:
             return None
 
-        # もとのフィールド定義をコピー (HACK: 要過不足検証)
+        attrs['queryset'] = queryset if queryset else serializer.Meta.model._default_manager.all()
+
+        # もとのフィールド定義をコピー (HACK: プロパティの過不足検証)
         for attr in [
             'required', 'default', 'allow_null',
             'validators', 'queryset', 'help_text', 'source'
@@ -38,8 +39,7 @@ class PKWritableMixin:
             if hasattr(serializer, attr) and attr not in attrs:
                 attrs[attr] = getattr(serializer, attr)
 
-        return serializers.PrimaryKeyRelatedField(queryset=serializer.Meta.model._default_manager.all(),
-                                                  **attrs)
+        return serializers.PrimaryKeyRelatedField(**attrs)
 
     def get_fields(self):
 
@@ -47,9 +47,11 @@ class PKWritableMixin:
         if getattr(self.context.get('view'), 'action', '') not in ('create', 'update', 'partial_update',):
             return fields
 
+        querysets = getattr(self.Meta, 'pk_update_querysets', {})
+
         for f in [f for f in fields if not getattr(fields[f], 'read_only', True)]:
 
-            new_field = self._get_pk_field(fields[f])
+            new_field = self._get_pk_field(fields[f], querysets.get('f'))
             if new_field:
                 self._org_pk_fields[f] = fields[f]
                 fields[f] = new_field
@@ -84,13 +86,17 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(PKWritableMixin, serializers.ModelSerializer):
+    category = CategorySerializer(required=False, help_text='spam', read_only=True)
     # category = CategorySerializer(required=False, help_text='spam')
-    category = CategorySerializer(required=False, help_text='spam')
     tags = TagSerializer(many=True, help_text='tag dayo', required=False)
-    # tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
 
+    # tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
 
     class Meta:
         model = Article
         # exclude = ('category',)
         fields = '__all__'
+
+        pk_update_querysets = {
+            'tags': Tag.objects.filter(name__startswith='a')
+        }
