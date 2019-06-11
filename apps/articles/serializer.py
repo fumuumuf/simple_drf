@@ -29,7 +29,7 @@ class PKWritableMixin:
         else:
             return None
 
-        attrs['queryset'] = queryset if queryset else serializer.Meta.model._default_manager.all()
+        attrs['queryset'] = queryset if queryset is not None else serializer.Meta.model._default_manager.all()
 
         # もとのフィールド定義をコピー (HACK: プロパティの過不足検証)
         for attr in [
@@ -51,7 +51,7 @@ class PKWritableMixin:
 
         for f in [f for f in fields if not getattr(fields[f], 'read_only', True)]:
 
-            new_field = self._get_pk_field(fields[f], querysets.get('f'))
+            new_field = self._get_pk_field(fields[f], querysets.get(f))
             if new_field:
                 self._org_pk_fields[f] = fields[f]
                 fields[f] = new_field
@@ -98,5 +98,5 @@ class ArticleSerializer(PKWritableMixin, serializers.ModelSerializer):
         fields = '__all__'
 
         pk_update_querysets = {
-            'tags': Tag.objects.filter(name__startswith='a')
+            'tags': Tag.objects.filter(name__startswith='w')
         }
