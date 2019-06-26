@@ -158,3 +158,6 @@ NOTEBOOK_ARGUMENTS = [
     '--port', '8000',
     '--allow-root'
 ]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'site_media/')
+MEDIA_URL = '/media/'
