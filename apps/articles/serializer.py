@@ -5,6 +5,7 @@ import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.fields import FileField
+from rest_framework.utils.field_mapping import get_field_kwargs
 
 from articles.models import Article
 from django.db import models
@@ -17,6 +18,7 @@ from django.core.exceptions import ValidationError
 from django.template.defaultfilters import filesizeformat
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
+
 
 class Base64FileField(serializers.FileField):
     """
@@ -44,28 +46,43 @@ class Base64FileField(serializers.FileField):
     }
 
     def to_internal_value(self, data):
-        return super(Base64FileField, self).to_internal_value(data)
-        # if not isinstance(data, str):
-        #     raise serializers.ValidationError(self._ERROR_MESSAGE)
-        #
-        # split_data = data.replace('data:', '', 1).split(';base64,')
-        # if len(split_data) != 2:
-        #     raise serializers.ValidationError(self._ERROR_message + ' データの中に MIME Type が含まれているか確認してください.')
-        #
-        # mime, encoded_data = split_data
-        # try:
-        #     extension = self._MIME_MAPPING[mime] if mime in self._MIME_MAPPING.keys() else mimetypes.guess_extension(
-        #         mime)
-        #
-        #     data = ContentFile(base64.b64decode(encoded_data),
-        #                        name='{name}{extension}'.format(name=str(uuid.uuid4()), extension=extension))
-        #     return super(Base64FileField, self).to_internal_value(data)
-        #
-        # except (ValueError, binascii.Error):
-        #     raise serializers.ValidationError(self._ERROR_MESSAGE)
+        if not isinstance(data, str):
+            raise serializers.ValidationError(self._ERROR_MESSAGE)
+
+        split_data = data.replace('data:', '', 1).split(';base64,')
+        if len(split_data) != 2:
+            raise serializers.ValidationError(self._ERROR_message + ' データの中に MIME Type が含まれているか確認してください.')
+
+        mime, encoded_data = split_data
+        try:
+            extension = self._MIME_MAPPING[mime] if mime in self._MIME_MAPPING.keys() else mimetypes.guess_extension(
+                mime)
+
+            data = ContentFile(base64.b64decode(encoded_data),
+                               name='{name}{extension}'.format(name=str(uuid.uuid4()), extension=extension))
+            return super(Base64FileField, self).to_internal_value(data)
+
+        except (ValueError, binascii.Error):
+            raise serializers.ValidationError(self._ERROR_MESSAGE)
+
+def get_field_kwargs_from_model(model, field_name):
+    '''
+    モデルの指定フィールドの定義をコピーする
+    :param model:
+    :param field_name:
+    :return:
+    '''
+
+    model_field = next(filter(lambda x: x.name == field_name, model._meta.fields), None)
+    if not model_field: return {}
+    kwargs = get_field_kwargs(field_name, model_field)
+    kwargs.pop('model_field', None)
+    return kwargs
 
 class ArticleSerializer(serializers.ModelSerializer):
-    file = FileField(allow_null=True, write_only=True, help_text='このフィールドは file 登録用です.')
+
+    file = Base64FileField(**get_field_kwargs_from_model(Article,'file'))
+
     class Meta:
         model = Article
         fields = '__all__'
