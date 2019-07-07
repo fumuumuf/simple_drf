@@ -9,6 +9,11 @@ class Tag(models.Model):
     def __str__(self):
         return f'{self.id} - {self.name}'
 
+
+class Category(models.Model):
+    name = models.CharField('name', max_length=120, default='no title')
+
+
 class Article(models.Model):
     '''
     記事
@@ -18,7 +23,7 @@ class Article(models.Model):
     title = models.CharField('タイトル', max_length=120, default='no title')
     body = models.TextField('本文')
     tags = models.ManyToManyField(Tag, blank=True, related_name='articles', verbose_name='タグ', help_text='記事につけるタグ')
-
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, default=None, )
 
     def __str__(self):
         return f'{self.id} - {self.title}'
