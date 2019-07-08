@@ -1,3 +1,4 @@
+from drf_writable_nested import NestedUpdateMixin
 from rest_framework import serializers
 from rest_framework.utils.model_meta import get_field_info
 
@@ -10,7 +11,8 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ArticleSerializer(serializers.ModelSerializer):
+class ArticleSerializer(NestedUpdateMixin, serializers.ModelSerializer):
+    category = CategorySerializer(many=False)
     class Meta:
         model = Article
         fields = '__all__'
