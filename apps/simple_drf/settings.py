@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
+    'guardian',
     'silk',
     'accounts',
     'articles',
@@ -55,6 +56,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'simple_drf.urls'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 TEMPLATES = [
     {

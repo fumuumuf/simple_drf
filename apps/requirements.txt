@@ -11,6 +11,8 @@ drf-extensions
 PyMySQL
 mysqlclient
 python-dotenv
+django-guardian
+djangorestframework-guardian
 
 # inspection
 django-silk
@@ -29,3 +31,4 @@ flake8-quotes
 # others
 django-extensions
 jupyter
+
