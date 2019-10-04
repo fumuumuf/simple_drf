@@ -1,8 +1,6 @@
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import FilterSet
 from rest_access_policy import AccessPolicy
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from articles.models import Article
@@ -10,8 +8,14 @@ from articles.serializer import ArticleSerializer
 
 
 class ArticleAccessPolicy(AccessPolicy):
+    """
+    記事に関するアクセスポリシー
+
+    Note:
+        デフォルトはすべてのアクセスを拒否
+    """
+
     statements = [
-        # all access is implicitly denied by default
         {
             "action": ["list", "retrieve"],
             "principal": "*",
@@ -22,49 +26,54 @@ class ArticleAccessPolicy(AccessPolicy):
             "principal": ["group:editor"],
             "effect": "allow"
         },
-        # is_author True なら delete 可能
+        # is_author True なら delete(action:destroy) 可能
         {
-            "action": ["delete"],
+            "action": ["destroy"],
             "principal": ["*"],
             "effect": "allow",
             "condition": "is_author"
         },
-        # condition が true なら, 全員 deny
-        {
-            "action": ["*"],
-            "principal": ["*"],
-            "effect": "deny",
-            "condition": "is_happy_hour"
-        }
     ]
 
     def is_author(self, request, view, action) -> bool:
+        """
+        request.user が author であるか？
+        """
+        # scope_queryset を使用している場合, scope_querysetでのフィルタリングもされることに注意
         article = view.get_object()
         return request.user == article.author
 
-    def is_happy_hour(self, request, view, action) -> bool:
-        now = datetime.datetime.now()
-        return now.hour >= 17 and now.hour <= 18
+    @classmethod
+    def scope_queryset(cls, request, queryset):
+        if request.user.groups.filter(name='editor').exists():
+            return queryset
 
-        @classmethod
-        def scope_queryset(cls, request, queryset):
-            if request.user.groups.filter(name='editor').exists():
-                return queryset
+        return queryset.filter(status='publish')
 
-            return queryset.filter(status='published')
 
-    class ArticleViewSet(viewsets.ModelViewSet):
-        """
-        A viewset for viewing and editing user instances.
-        """
+class ArticleViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing user instances.
+    """
 
-        class ArticleFilterSet(FilterSet):
-            class Meta:
-                model = Article
-                fields = {
-                    'id': ['exact']
-                }
+    permission_classes = (ArticleAccessPolicy,)
 
-        serializer_class = ArticleSerializer
-        queryset = Article.objects.prefetch_related('tags')
-        filterset_class = ArticleFilterSet
+    @property
+    def access_policy(self):
+        return self.permission_classes[0]
+
+    serializer_class = ArticleSerializer
+    queryset = Article.objects.select_related('category').prefetch_related('tags')
+
+    def get_queryset(self):
+        return self.access_policy.scope_queryset(
+            self.request, Article.objects.all()
+        )
+
+    @action(methods=["POST"], detail=False)
+    def publish(self, request, *args, **kwargs):
+        return Response('to publish!')
+
+    @action(methods=["POST"], detail=False)
+    def unpublish(self, request, *args, **kwargs):
+        return Response('to unpublish!')

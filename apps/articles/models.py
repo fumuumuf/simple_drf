@@ -24,6 +24,8 @@ class Article(models.Model):
     body = models.TextField('本文')
     tags = models.ManyToManyField(Tag, blank=True, related_name='articles', verbose_name='タグ', help_text='記事につけるタグ')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, default=None, )
+    STATUS = (('publish', '公開'), ('unpublish', '非公開'))
+    status = models.CharField('公開ステータス', max_length=32, choices=STATUS, default='unpublish')
 
     def __str__(self):
         return f'{self.id} - {self.title}'
