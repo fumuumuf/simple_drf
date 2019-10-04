@@ -11,6 +11,7 @@ drf-extensions
 PyMySQL
 mysqlclient
 python-dotenv
+drf-access-policy
 
 # inspection
 django-silk
