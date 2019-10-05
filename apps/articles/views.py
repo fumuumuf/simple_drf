@@ -32,7 +32,7 @@ class ArticleAccessPolicy(AccessPolicy):
             "principal": ["*"],
             "effect": "allow",
             "condition": "is_author"
-        },
+        }
     ]
 
     def is_author(self, request, view, action) -> bool:
