@@ -156,7 +156,8 @@ SILKY_PYTHON_PROFILER = True
 NOTEBOOK_ARGUMENTS = [
     '--ip', '0.0.0.0',
     '--port', '8000',
-    '--allow-root'
+    '--allow-root',
+    '--no-browser'
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'site_media/')
