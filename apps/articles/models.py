@@ -46,6 +46,10 @@ INT_MAX = 0x7fffffff
 
 
 class FFMManager(models.Manager):
+    """
+    TODO: forest_keys みたいに 1つのモデル内で複数の forest を管理できるように.
+          と思ったが, 森として扱いたい(例えば ファイルフォルダなど) 場合は必要だが, 木として扱いたい場合は不要.
+    """
 
     def get_queryset(self):
         return FFMQuerySet(self.model, using=self._db)
