@@ -54,7 +54,7 @@ class FFMManager(models.Manager):
         """
         base の 子孫ノードを検索
         Args:
-            base (FFM): ベースとなる FF インスタンス. このインスタンスの子孫ノードを取得
+            base (FertileForestNode): ベースとなる FF インスタンス. このインスタンスの子孫ノードを取得
             limit_depth (int): 何世代まで取得するか？
             with_top: base ノードも含めるかどうか
         """
@@ -81,7 +81,7 @@ class FFMManager(models.Manager):
         """
         先祖ノードの検索
         Args:
-            node (Union[int, FFM]): 対象ノードまたはその id
+            node (Union[int, FertileForestNode]): 対象ノードまたはその id
             limit_depth (int): 何世代前まで取得するか？
         Returns:
             queryset
@@ -89,7 +89,7 @@ class FFMManager(models.Manager):
         if isinstance(node, int):
             node = self.get(id=node)
 
-        sub_qs = FFM.objects.filter(queue__lt=node.queue, depth__lt=node.depth, )
+        sub_qs = FertileForestNode.objects.filter(queue__lt=node.queue, depth__lt=node.depth, )
         if limit_depth:
             sub_qs = sub_qs.filter(depth__gte=node.depth - limit_depth)
         sub_qs = sub_qs.values('depth').annotate(max_queue=Max('queue'))
@@ -102,7 +102,7 @@ class FFMManager(models.Manager):
         Args:
             **kwargs:
         Returns:
-            FFM: 追加ノード
+            FertileForestNode: 追加ノード
         """
         params['depth'] = 0
         mq = self.aggregate(mq=Max('queue'))['mq']
@@ -116,10 +116,10 @@ class FFMManager(models.Manager):
         """
         ノードの追加
         Args:
-            base (Union[int, FFM]): 親ノードのインスタンスまたはその id
+            base (Union[int, FertileForestNode]): 親ノードのインスタンスまたはその id
             **params: ノードのパラメータ
         Returns:
-            FFM: 追加ノード
+            FertileForestNode: 追加ノード
         """
         if not base:
             return self.add_root(**params)
@@ -129,10 +129,10 @@ class FFMManager(models.Manager):
 
         with transaction.atomic():  # start transaction
             self.filter(queue__gt=base.queue).update(queue=F('queue') + 1)
-            params = {
+            params.update({
                 'queue': base.queue + 1,
                 'depth': base.depth + 1,
-            }
+            })
             return self.create(**params)
 
     def delete_descendants(self, base, with_top=False):
@@ -140,7 +140,7 @@ class FFMManager(models.Manager):
         base の子孫ノードを削除します.
         base ノードも削除する場合は with_top に True を指定してください.
         Args:
-            base (Union[int, FFM]): ノードのインスタンスまたはその id
+            base (Union[int, FertileForestNode]): ノードのインスタンスまたはその id
             with_top: base も一緒に削除するかどうか
         Returns: delete の結果
         """
@@ -151,7 +151,7 @@ class FFMManager(models.Manager):
     def delete_only_node(self, node):
         """
         Args:
-            node (FFM): このノードのみを削除し, 子孫ノードは残します.
+            node (FertileForestNode): このノードのみを削除し, 子孫ノードは残します.
         """
         with transaction.atomic():  # start transaction
             node.delete()
@@ -160,7 +160,7 @@ class FFMManager(models.Manager):
         return True
 
 
-class FFM(models.Model):
+class FertileForestNode(models.Model):
     objects = FFMManager()
     depth = models.PositiveIntegerField()
     queue = models.PositiveIntegerField()
