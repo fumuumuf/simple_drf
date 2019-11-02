@@ -15,9 +15,9 @@ class Category(models.Model):
 
 
 class Article(models.Model):
-    '''
+    """
     記事
-    '''
+    """
 
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles', verbose_name='記事の作者')
     title = models.CharField('タイトル', max_length=120, default='no title')
@@ -27,7 +27,3 @@ class Article(models.Model):
 
     def __str__(self):
         return f'{self.id} - {self.title}'
-
-
-class Meta:
-    ordering = ['-created_at']
