@@ -32,27 +32,22 @@ class Article(models.Model):
         return f'{self.id} - {self.title}'
 
 
-class FFMQuerySet(models.QuerySet):
-    # def get_parents(self):
-    #     return self.filter(role='A')
-    #
-    # def get_parent(self):
-    #     return self.filter(role='E')
-    #
-    pass
-
-
 INT_MAX = 0x7fffffff
 
 
-class FFMManager(models.Manager):
-    """
-    TODO: forest_keys みたいに 1つのモデル内で複数の forest を管理できるように.
-          と思ったが, 森として扱いたい(例えば ファイルフォルダなど) 場合は必要だが, 木として扱いたい場合は不要.
-    """
+def extract_forest_params(node, forest_keys):
+    res = {}
+    for k in forest_keys:
+        res[k] = getattr(node, k, None)
+    return res
 
-    def get_queryset(self):
-        return FFMQuerySet(self.model, using=self._db)
+
+class FFMQuerySet(models.QuerySet):
+    # 森を区別するための key
+    forest_keys = []
+
+    def extract_forest_params(self, node):
+        return extract_forest_params(node, self.forest_keys)
 
     def sub_tree(self, base, limit_depth=None, with_top=False):
         """
@@ -62,19 +57,25 @@ class FFMManager(models.Manager):
             limit_depth (int): 何世代まで取得するか？
             with_top: base ノードも含めるかどうか
         """
-        tree_start_cond = Q(depth__gt=base.depth) & Q(queue__gt=base.queue)
-        if with_top:
-            tree_start_cond = tree_start_cond | Q(id=base.id)
+        forest_params = self.extract_forest_params(base)
 
+        # 木の終わり判定用クエリ
         # HACK: RawSQL 使わずできるか？
         # x はダミー列. これにより annotate で取得でき, Subquery に渡せる.
         tree_end_cond_qs = self.annotate(x=RawSQL("'0'", [])).values('x'). \
-            filter(queue__gt=base.queue, depth__lte=base.depth). \
+            filter(queue__gt=base.queue, depth__lte=base.depth, **forest_params). \
             annotate(min_queue=Min('queue'))
+
+        tree_start_cond = Q(depth__gt=base.depth) & Q(queue__gt=base.queue)
+        if with_top:
+            tree_start_cond = tree_start_cond | Q(id=base.id)
         qs = self.filter(tree_start_cond,
-                         queue__lt=Coalesce(Subquery(tree_end_cond_qs.values('min_queue')[:1]), Value(INT_MAX)))
+                         queue__lt=Coalesce(Subquery(tree_end_cond_qs.values('min_queue')[:1]), Value(INT_MAX)),
+                         **forest_params)
+
         if limit_depth:
             qs = qs.filter(depth__lte=base.depth + limit_depth)
+
         return qs
 
     def find_tree(self, root_id, limit_depth=None):
@@ -93,12 +94,55 @@ class FFMManager(models.Manager):
         if isinstance(node, int):
             node = self.get(id=node)
 
-        sub_qs = FertileForestNode.objects.filter(queue__lt=node.queue, depth__lt=node.depth, )
+        forest_params = self.extract_forest_params(base)
+
+        sub_qs = FertileForestNode.objects.filter(queue__lt=node.queue, depth__lt=node.depth,
+                                                  **forest_params)
         if limit_depth:
             sub_qs = sub_qs.filter(depth__gte=node.depth - limit_depth)
         sub_qs = sub_qs.values('depth').annotate(max_queue=Max('queue'))
 
         return self.filter(queue__in=Subquery(sub_qs.values('max_queue')))
+
+
+class ForestKeyException(Exception):
+    pass
+
+
+class FFMManager(models.Manager):
+    """
+    TODO: forest_keys みたいに 1つのモデル内で複数の forest を管理できるように.
+          と思ったが, 森として扱いたい(例えば ファイルフォルダなど) 場合は必要だが, 木として扱いたい場合は不要.
+    """
+
+    @property
+    def forest_keys(self):
+        return getattr(self.model.Meta, 'forest_keys', [])
+
+    def get_queryset(self):
+        qs = FFMQuerySet(self.model, using=self._db)
+        qs.forest_keys = self.forest_keys
+
+    def filter(self, *args, **kwargs):
+        # TODO: soft-delete の コードを参考にしたけど, ちゃんと理解できてない:-(
+        qs = super(FFMManager, self).filter(*args, **kwargs)
+        qs.__class__ = FFMQuerySet
+        qs.forest_keys = self.forest_keys
+        return qs
+
+    def find_ancestor(self, *args, **kwargs):
+        self.get_queryset().find_ancestor(*args, **kwargs)
+
+    def find_tree(self, *args, **kwargs):
+        self.get_queryset().find_tree(*args, **kwargs)
+
+    def validate_forest_keys(self, params: dict):
+        for k in self.forest_keys:
+            if k not in params:
+                raise ForestKeyException(f'forest key:{k} が含まれていません')
+
+    def _extract_forest_keys_in_param(self, params: dict):
+        return {_: params[_] for _ in set(self.forest_keys) & params.keys()}
 
     def add_root(self, **params):
         """
@@ -109,7 +153,11 @@ class FFMManager(models.Manager):
             FertileForestNode: 追加ノード
         """
         params['depth'] = 0
-        mq = self.aggregate(mq=Max('queue'))['mq']
+        self.validate_forest_keys(params)
+
+        mq = self.filter(self._extract_forest_keys_in_param(params)) \
+            .aggregate(mq=Max('queue'))['mq']
+
         if mq is None:
             params['queue'] = 0
         else:
@@ -131,6 +179,7 @@ class FFMManager(models.Manager):
         if isinstance(base, int):
             base = self.get(id=base)
 
+        params.update(extract_forest_params(base, self.forest_keys))
         with transaction.atomic():  # start transaction
             self.filter(queue__gt=base.queue).update(queue=F('queue') + 1)
             params.update({
@@ -150,7 +199,7 @@ class FFMManager(models.Manager):
         """
         if isinstance(base, int):
             base = self.get(id=base)
-        return self.sub_tree(base, with_top=with_top).delete()
+        return self.get_queryset().sub_tree(base, with_top=with_top).delete()
 
     def delete_only_node(self, node):
         """
@@ -159,7 +208,7 @@ class FFMManager(models.Manager):
         """
         with transaction.atomic():  # start transaction
             node.delete()
-            update_nodes = self.sub_tree(node)
+            update_nodes = self.get_queryset().sub_tree(node)
             update_nodes.update(depth=F('depth') - Value(1))
         return True
 
@@ -171,4 +220,14 @@ class FertileForestNode(models.Model):
     name = models.CharField(max_length=100, blank=True, )
 
     def __str__(self):
-        return f'({self.depth}, {self.queue}): {self.name}'
+        return f'{self.id}({self.depth}, {self.queue})'
+
+    class Meta:
+        abstract = True
+
+
+class Comment(FertileForestNode):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+
+    class Meta:
+        forest_keys = ['article_id']
