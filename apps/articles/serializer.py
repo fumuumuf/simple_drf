@@ -3,9 +3,10 @@ from collections import defaultdict
 
 from django.db import models
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ListSerializer
 
-from articles.models import Article, Category, FertileForestNode
+from articles.models import Article, Category, FertileForestNode, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -14,14 +15,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
-
-
-class ArticleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-
-    class Meta:
-        model = Article
         fields = '__all__'
 
 
@@ -60,15 +53,33 @@ class FFMListSerializer(ListSerializer):
 
 
 class FertileForestNodeSerializer(serializers.ModelSerializer):
-    def __init__(self, *args, **kwargs):
-        super(FertileForestNodeSerializer, self).__init__(*args, **kwargs)
+    parent = PrimaryKeyRelatedField(queryset=FertileForestNode, required=False, allow_null=True)
 
     def to_representation(self, instance):
         if getattr(instance, 'children', None):
-            self.fields['children'] = ListSerializer(child=FertileForestNodeSerializer())
+            # TODO: この child の指定の仕方で正しい？
+            self.fields['children'] = ListSerializer(child=self.__class__())
         return super(FertileForestNodeSerializer, self).to_representation(instance)
 
+    # class Meta:
+    #     model = FertileForestNode
+    #     exclude = ['queue', 'id']
+    #     list_serializer_class = FFMListSerializer
+
+
+class CommentSerializer(FertileForestNodeSerializer):
+    parent = PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False, allow_null=True, write_only=True)
+
     class Meta:
-        model = FertileForestNode
-        exclude = ['queue', 'id']
+        model = Comment
+        exclude = ['queue', ]
         list_serializer_class = FFMListSerializer
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+    # category = CategorySerializer(read_only=True)
+    comments = CommentSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Article
+        fields = '__all__'

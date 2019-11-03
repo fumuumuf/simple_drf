@@ -47,8 +47,6 @@ INT_MAX = 0x7fffffff
 
 class FFMManager(models.Manager):
     """
-    TODO: forest_keys みたいに 1つのモデル内で複数の forest を管理できるように.
-          と思ったが, 森として扱いたい(例えば ファイルフォルダなど) 場合は必要だが, 木として扱いたい場合は不要.
     """
 
     def get_queryset(self):
@@ -57,6 +55,7 @@ class FFMManager(models.Manager):
     def sub_tree(self, base, limit_depth=None, with_top=False):
         """
         base の 子孫ノードを検索
+        TODO: これら filter 系 は queryset に移動してもよいかも
         Args:
             base (FertileForestNode): ベースとなる FF インスタンス. このインスタンスの子孫ノードを取得
             limit_depth (int): 何世代まで取得するか？
@@ -99,6 +98,19 @@ class FFMManager(models.Manager):
         sub_qs = sub_qs.values('depth').annotate(max_queue=Max('queue'))
 
         return self.filter(queue__in=Subquery(sub_qs.values('max_queue')))
+
+    def create(self, **kwargs):
+        """
+        Create a new object with the given kwargs, saving it to the database
+        and returning the created object.
+        """
+        if 'parent' in kwargs:
+            parent = kwargs.pop('parent')
+            return self.add_node(parent, **kwargs)
+        elif 'depth' not in kwargs:
+            return self.add_root(**kwargs)
+        else:
+            return super(FFMManager, self).create(**kwargs)
 
     def add_root(self, **params):
         """
@@ -166,9 +178,19 @@ class FFMManager(models.Manager):
 
 class FertileForestNode(models.Model):
     objects = FFMManager()
-    depth = models.PositiveIntegerField()
-    queue = models.PositiveIntegerField()
-    name = models.CharField(max_length=100, blank=True, )
+    depth = models.PositiveIntegerField(editable=False)
+    queue = models.PositiveIntegerField(editable=False)
 
     def __str__(self):
-        return f'({self.depth}, {self.queue}): {self.name}'
+        return f'({self.depth}, {self.queue})'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(FertileForestNode, self).save()
+
+    class Meta:
+        abstract = True
+
+
+class Comment(FertileForestNode):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
+    body = models.CharField(max_length=128, default='comment')
