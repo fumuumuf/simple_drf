@@ -1,0 +1,83 @@
+[
+{
+  "model": "articles.fertileforestnode",
+  "pk": 1,
+  "fields": {
+    "depth": 0,
+    "queue": 0,
+    "name": "A"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 2,
+  "fields": {
+    "depth": 1,
+    "queue": 1,
+    "name": "B"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 3,
+  "fields": {
+    "depth": 1,
+    "queue": 4,
+    "name": "C"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 4,
+  "fields": {
+    "depth": 2,
+    "queue": 2,
+    "name": "D"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 5,
+  "fields": {
+    "depth": 2,
+    "queue": 3,
+    "name": "E"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 6,
+  "fields": {
+    "depth": 2,
+    "queue": 5,
+    "name": "F"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 7,
+  "fields": {
+    "depth": 2,
+    "queue": 6,
+    "name": "G"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 8,
+  "fields": {
+    "depth": 3,
+    "queue": 7,
+    "name": "H"
+  }
+},
+{
+  "model": "articles.fertileforestnode",
+  "pk": 9,
+  "fields": {
+    "depth": 3,
+    "queue": 8,
+    "name": "I"
+  }
+}
+]
