@@ -9,7 +9,7 @@ django-model-utils
 inflection
 drf-extensions
 PyMySQL
-mysqlclient
+# mysqlclient
 python-dotenv
 
 # inspection
