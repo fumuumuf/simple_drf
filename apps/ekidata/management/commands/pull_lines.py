@@ -1,40 +1,44 @@
-import json
-import urllib
+from django.core.management import BaseCommand
+from rest_framework import serializers
 
-import requests
-import xmltodict
-
-
-class EkidataAPI:
-    BASE_URL = 'http://www.ekidata.jp/api/'
-
-    def _get(self, path=None, data={}):
-        headers = {
-            'Accept': 'application/xml',
-            'accept-encoding': 'gzip, deflate, br',
-        }
-
-        url = self.BASE_URL
-        if path:
-            url = urllib.parse.urljoin(url, path)
-
-        response = requests.get(url, data, headers=headers)
-        response.encoding = 'utf-8'
-        print(response.encoding)
-        if response.status_code != 200:
-            raise Exception(str(response.text))
-
-        return response.text
-        # return response.json()
-
-    def get_line_data(self, line_id):
-        data = self._get(f'l/{line_id}.xml')
-        return data
+from ekidata.management.commands.ekidata_api import EkidataAPI
+from ekidata.models import Line
 
 
-if __name__ == '__main__':
-    data = EkidataAPI().get_line_data(11302)
+class LineSerializer(serializers.ModelSerializer):
+    line_cd = serializers.IntegerField(source='id')
+    line_name = serializers.CharField(source='name')
+    line_lat = serializers.CharField(source='lat', allow_blank=True, required=False)
+    line_lon = serializers.CharField(source='lon', allow_blank=True, required=False)
+    line_zoom = serializers.CharField(source='zoom', allow_blank=True, required=False)
 
-    res = xmltodict.parse(data)
-    res = json.dumps(res, indent=4)
-    print(res)
+    class Meta:
+        model = Line
+        exclude = ['id', 'name']
+
+
+class Command(BaseCommand):
+    help = 'load ekidata'
+
+    # def add_arguments(self, parser):
+    #     parser.add_argument('poll_ids', nargs='+', type=int)
+
+    def handle(self, *args, **options):
+        api = EkidataAPI()
+        line = api.get_line(11302)
+        # all_line = api.get_all_line_cd()
+        all_line = [line['ekidata']['line']['line_cd']]
+        for cd in all_line:
+            res = api.get_line(cd)
+
+            line = res['ekidata']['line']
+            instance = Line.objects.filter(id=int(line['line_cd'])).first()
+            if instance:
+                serializer = LineSerializer(instance, data=line, partial=True)
+            else:
+                serializer = LineSerializer(data=line)
+            if serializer.is_valid(raise_exception=False):
+                serializer.save()
+            else:
+                print('load error line_id:', line['line_cd'])
+            break
