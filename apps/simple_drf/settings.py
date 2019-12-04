@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'silk',
     'accounts',
     'articles',
+    'django_slack',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,14 @@ NOTEBOOK_ARGUMENTS = [
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'site_media/')
 MEDIA_URL = '/media/'
+
+# TODO: set token or endpoint
+# SLACK_TOKEN = ''
+# SLACK_ENDPOINT_URL=''
+SLACK_BACKEND = 'django_slack.backends.UrllibBackend'
+
+# STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'public/static/')
+# STATICFILES_DIRS = (
+#     [os.path.join(BASE_DIR, 'static')]
+# )
