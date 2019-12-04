@@ -202,3 +202,5 @@ dmypy.json
 # End of https://www.gitignore.io/api/django,python,jupyternotebook
 
 apps/site_media/
+
+apps/public/static
