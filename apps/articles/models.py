@@ -11,7 +11,7 @@ class Tag(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField('name', max_length=120, default='no title')
+    name = models.CharField('名前', max_length=120, default='no title')
 
 
 class Article(models.Model):
