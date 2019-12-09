@@ -23,11 +23,13 @@ from rest_framework.documentation import include_docs_urls
 from rest_framework.permissions import AllowAny
 
 import articles.urls
+import db_info.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^silk/', include('silk.urls', namespace='silk')),
     path('articles/', include(articles.urls)),
+    path('db_info/', include(db_info.urls)),
 ]
 
 urlpatterns.append(
