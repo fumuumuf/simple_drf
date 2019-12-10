@@ -51,7 +51,7 @@ python manage.py runserver
 ## 初期データ
 テスト用データは, 各 app の `/fixutres/data.son` に配置する.
 
-次のスクリプを実行することでロードされる.
+次のスクリプトを実行することでロードされる.
 
 ```shell
 python manage.py loaddata  ./*/fixtures/data.json
