@@ -9,7 +9,10 @@ django-model-utils
 inflection
 drf-extensions
 PyMySQL
+
+# mysql 使用しないなら無くても OK
 mysqlclient
+
 python-dotenv
 
 # inspection
