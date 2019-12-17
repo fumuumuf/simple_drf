@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth',
     'rest_auth.registration',
+    'drf_registration',
     'silk',
     'accounts',
     'articles',
@@ -175,3 +176,7 @@ NOTEBOOK_ARGUMENTS = [
     '--no-browser',
     "--NotebookApp.token=''"
 ]
+
+# email
+# ----------------------------------------------------------------------------
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

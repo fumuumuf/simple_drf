@@ -23,6 +23,7 @@ from rest_framework.documentation import include_docs_urls
 from rest_framework.permissions import AllowAny
 
 import articles.urls
+import drf_registration.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,5 +42,6 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # rest_auth urls
 urlpatterns += [
     url(r'^rest-auth/', include('rest_auth.urls')),
-    url(r'^rest-auth/registration/', include('rest_auth.registration.urls'))
+    # url(r'^rest-auth/registration/', include('rest_auth.registration.urls'))
+    url(r'^rest-auth/registration/', include(drf_registration.urls))
 ]

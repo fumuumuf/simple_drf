@@ -1,0 +1,11 @@
+title ユーザー登録の流れ
+
+autonumber
+ユーザー->Frontサーバー:新規登録画面へアクセス
+Frontサーバー-> バックエンド(Django): `/rest-auth/password/reset/` に email, password をPOST
+Frontサーバー<--バックエンド(Django): 201 response
+
+ユーザー<-バックエンド(Django):アカウント本登録用のメールを送信
+ユーザー->バックエンド(Django):メールに記載のリンクへアクセス
+バックエンド(Django)-->ユーザー: Frontサーバーの登録認証後ページへリダイレクト
+Frontサーバー->ユーザー: 認証結果の表示
