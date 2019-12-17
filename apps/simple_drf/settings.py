@@ -162,6 +162,11 @@ REST_FRAMEWORK = {
 # ----------------------------------------------------------------------------
 AUTH_USER_MODEL = 'accounts.User'
 
+# all_auth settings
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+
 # その他
 # ----------------------------------------------------------------------------
 # silk 有効化
