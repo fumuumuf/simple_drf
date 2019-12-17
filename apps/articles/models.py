@@ -20,10 +20,10 @@ class Article(models.Model):
     """
 
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles', verbose_name='記事の作者')
-    title = models.CharField('タイトル', max_length=120, default='no title')
+    title = models.CharField('タイトル', max_length=120, blank=True, default='no title')
     body = models.TextField('本文')
     tags = models.ManyToManyField(Tag, blank=True, related_name='articles', verbose_name='タグ', help_text='記事につけるタグ')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, default=None, )
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True, default=None, )
 
     def __str__(self):
         return f'{self.id} - {self.title}'
