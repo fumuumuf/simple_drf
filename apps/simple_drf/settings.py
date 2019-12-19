@@ -167,6 +167,12 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 
+# django-rest-auth
+REST_AUTH_SERIALIZERS = {
+    # パスワードリセットの serializer
+    'PASSWORD_RESET_SERIALIZER': 'drf_custom_auth.serializers.CustomPasswordResetSerializer',
+}
+
 # その他
 # ----------------------------------------------------------------------------
 # silk 有効化
