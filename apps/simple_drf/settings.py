@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth',
     'rest_auth.registration',
-    'drf_registration',
+    'drf_custom_auth',
     'silk',
     'accounts',
     'articles',
