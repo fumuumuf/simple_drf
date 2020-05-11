@@ -204,3 +204,6 @@ dmypy.json
 apps/site_media/
 
 apps/public/static
+
+docker/postgres/
+
