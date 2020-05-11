@@ -65,9 +65,7 @@ WSGI_APPLICATION = 'simple_drf.wsgi.application'
 # ----------------------------------------------------------------------------
 
 if os.getenv('USE_DB', '') == 'mysql':
-    import pymysql
 
-    pymysql.install_as_MySQLdb()
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
