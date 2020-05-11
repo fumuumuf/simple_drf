@@ -1,16 +1,29 @@
 version: '2.3'
 services:
-  # mysql
   db:
-    image: mysql:5.7.19
-    ports:
-      - 13306:3306
+    # 公式からイメージをpull
+    image: postgres:12.2-alpine
     volumes:
-      - ./docker/mysql/volumes:/var/lib/mysql
-      - ./docker/mysql/:/etc/mysql/conf.d
+      - ./docker/postgres/data:/var/lib/postgresql/data
+    # todo: 見直し
     environment:
-      MYSQL_ROOT_PASSWORD: password
-    container_name: simpe_drf_mysql
+        - POSTGRES_USER=django_db_user
+        - POSTGRES_PASSWORD=password1234
+        - POSTGRES_DB=django_db
+    ports:
+      - 5432:5432
+
+  #   # mysql
+  #   db:
+  #     image: mysql:5.7.19
+  #     ports:
+  #       - 13306:3306
+  #     volumes:
+  #       - ./docker/mysql/volumes:/var/lib/mysql
+  #       - ./docker/mysql/:/etc/mysql/conf.d
+  #     environment:
+  #       MYSQL_ROOT_PASSWORD: password
+  #     container_name: simpe_drf_mysql
   # django
   django_app:
     build: 
@@ -21,8 +34,8 @@ services:
       - 18000:8000
     environment:
       - DB_HOST=db
-      - DB_NAME=mysql_db
-      - DB_PASS=password
+      - DB_NAME=django_db
+      - DB_PASS=password1234
     volumes:
       - ./apps:/var/www/django
     tty: true
