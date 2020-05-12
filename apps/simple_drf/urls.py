@@ -26,7 +26,7 @@ import articles.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^silk/', include('silk.urls', namespace='silk')),
+    # url(r'^silk/', include('silk.urls', namespace='silk')),
     path('articles/', include(articles.urls)),
 ]
 

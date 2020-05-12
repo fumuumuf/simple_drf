@@ -15,6 +15,10 @@ python-dotenv
 # inspection
 django-silk
 
+# postgres sql
+# --------------
+psycopg2
+django-tenant-schemas
 
 # testing
 pytest-django

@@ -14,8 +14,30 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+SHARED_APPS = (
+    'tenant_schemas',  # mandatory, should always be before any django app
+    'tenants',  # you must list the app where your tenant model resides in
+
+    'django.contrib.contenttypes',
+
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+)
+
+TENANT_APPS = (
+    'django.contrib.contenttypes',
+
+    # your tenant-specific apps
+    'articles',
+)
+
 # Application definition
 INSTALLED_APPS = [
+    'tenant_schemas',  # mandatory, should always be before any django app
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -24,12 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
-    'silk',
+    # 'silk',
     'accounts',
+    'tenants',
     'articles',
 ]
 
 MIDDLEWARE = [
+    'tenant_schemas.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -37,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'silk.middleware.SilkyMiddleware',
+    # 'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'simple_drf.urls'
@@ -66,7 +90,7 @@ WSGI_APPLICATION = 'simple_drf.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'tenant_schemas.postgresql_backend',
         'NAME': 'django_db',
         'USER': 'django_db_user',
         'PASSWORD': 'password1234',
@@ -74,6 +98,11 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+DATABASE_ROUTERS = (
+    'tenant_schemas.routers.TenantSyncRouter',
+)
+
 # Password validation
 # ----------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -147,3 +176,5 @@ NOTEBOOK_ARGUMENTS = [
     '--no-browser',
     "--NotebookApp.token=''"
 ]
+
+TENANT_MODEL = "tenants.Tenant"
