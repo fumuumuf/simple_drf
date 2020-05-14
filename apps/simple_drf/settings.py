@@ -12,25 +12,27 @@ SECRET_KEY = 'i#d+^(t6ls2^=d_z@dk=sc=&=*ib3s6l=krc=d5e8!%rv3&h3+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*", ]
 
 SHARED_APPS = (
     'tenant_schemas',  # mandatory, should always be before any django app
     'tenants',  # you must list the app where your tenant model resides in
 
     'django.contrib.contenttypes',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'accounts',
 )
 
 TENANT_APPS = (
     'django.contrib.contenttypes',
-
+    'django.contrib.auth',
     # your tenant-specific apps
+    'accounts.front_users',
     'articles',
 )
 
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',
     # 'silk',
     'accounts',
+    'accounts.front_users',
     'tenants',
     'articles',
 ]
@@ -91,10 +94,11 @@ WSGI_APPLICATION = 'simple_drf.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'tenant_schemas.postgresql_backend',
-        'NAME': 'django_db',
+        'NAME': 'db2',
         'USER': 'django_db_user',
         'PASSWORD': 'password1234',
         'HOST': 'db',
+        # 'HOST': 'localhost',
         'PORT': '',
     }
 }
@@ -102,6 +106,7 @@ DATABASES = {
 DATABASE_ROUTERS = (
     'tenant_schemas.routers.TenantSyncRouter',
 )
+SESSION_COOKIE_DOMAIN = 'test.localhost'
 
 # Password validation
 # ----------------------------------------------------------------------------
