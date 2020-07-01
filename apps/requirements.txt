@@ -21,6 +21,7 @@ pytest-django
 mock
 factory-boy
 tox
+model_bakery
 
 # static code analysis
 flake8
