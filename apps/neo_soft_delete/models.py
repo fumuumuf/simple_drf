@@ -1,11 +1,14 @@
 from django.db import models
-
 # Create your models here.
 from model_utils.fields import MonitorField
 from model_utils.models import SoftDeletableModel as DefaultSoftDeletableModel
 
+from neo_soft_delete.managers import SoftDeletableManager
+
 
 class SoftDeletableModel(DefaultSoftDeletableModel):
+    objects = SoftDeletableManager()
+
     deleted_at = MonitorField(monitor='is_removed', when=[True], null=True, default=None, editable=False)
 
     class Meta:
