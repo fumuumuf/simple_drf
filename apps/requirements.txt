@@ -11,6 +11,7 @@ drf-extensions
 django-mysql
 mysqlclient
 python-dotenv
+django-import-export
 
 # inspection
 django-silk

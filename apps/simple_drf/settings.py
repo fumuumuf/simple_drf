@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'silk',
     'accounts',
     'articles',
+    'import_export',
 ]
 
 MIDDLEWARE = [
